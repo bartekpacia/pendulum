@@ -1,3 +1,4 @@
+from typing import Tuple
 import cv2
 import time
 print(f"using OpenCV v{cv2.__version__}")
@@ -12,6 +13,12 @@ time_start = time.time()
 labels = []
 stops_list = []
 
+
+def drawText(text: str, color: Tuple[int, int, int], pos: Tuple[int, int]):
+    cv2.putText(frame1, str(text), org=pos, fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                fontScale=1, color=color, thickness=3)
+
+
 prev_moving = False
 while capture.isOpened():
     diff = cv2.absdiff(frame1, frame2)
@@ -22,9 +29,7 @@ while capture.isOpened():
     contours, _ = cv2.findContours(
         dilated, cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE)
 
-    cv2.putText(frame1, f"T", org=(600, 400),
-                fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
-                color=(255, 0, 0), thickness=3)
+    drawText("T", (255, 0, 0), (600, 400))
 
     big_moving_things = 0
     for contour in contours:
@@ -59,17 +64,10 @@ while capture.isOpened():
     for label in labels:
 
         label_y += 30
-        cv2.putText(frame1, label, org=(10, label_y),
-                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
-                    color=color, thickness=3)
+        drawText(label, color, (10, label_y))
 
-    cv2.putText(frame1, msg, org=(10, 20),
-                fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
-                color=color, thickness=3)
-
-    cv2.putText(frame1, str(fps), org=(200, 20),
-                fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
-                color=color, thickness=3)
+    drawText(msg, color, (10, 20))
+    drawText(str(fps), color, (300, 20))
 
     cv2.imshow("feed", frame1)
     frame1 = frame2
