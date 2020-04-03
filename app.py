@@ -52,7 +52,7 @@ while capture.isOpened():
                 diff = round(time_total - stops_list[-2], 2)
 
                 if diff >= 0.5:
-                    labels.append(f"{elapsed}, diff: {diff}")
+                    labels.append(f"{time_total}, diff: {diff}")
                     prev_moving = False
 
     label_y = 60
