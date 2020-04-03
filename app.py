@@ -4,7 +4,7 @@ import time
 import numpy
 print(f"using OpenCV v{cv2.__version__}")
 
-capture = cv2.VideoCapture("film3_sd.mp4")
+capture = cv2.VideoCapture("film3_vga.mp4")
 fps = round(capture.get(cv2.CAP_PROP_FPS), 2)
 
 ret, frame1 = capture.read()
@@ -41,6 +41,7 @@ def drawText(text: str,
 
 prev_moving = False
 while capture.isOpened() and frame1 is not None and frame2 is not None:
+    t0 = cv2.getTickCount()
     T = cv2.absdiff(frame1, frame2)
     gray = cv2.cvtColor(T, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -98,6 +99,9 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
 
     if cv2.waitKey(1) == 27:
         break
+
+    t1 = cv2.getTickCount()
+    print(f"iteration took {(t1-t0)/cv2.getTickFrequency()} seconds.")
 
 
 print(f"Measured {len(T_list)} periods, average: {calc_avg_T()}")
