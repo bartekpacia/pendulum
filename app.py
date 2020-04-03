@@ -3,14 +3,14 @@ import time
 print(f"using OpenCV v{cv2.__version__}")
 
 capture = cv2.VideoCapture("film3.mp4")
+fps = round(capture.get(cv2.CAP_PROP_FPS), 2)
 
 ret, frame1 = capture.read()
 ret, frame2 = capture.read()
 
 time_start = time.time()
-prev_time = None
-time_labels = []
-elapsed_list = []
+labels = []
+stops_list = []
 
 prev_moving = False
 while capture.isOpened():
@@ -45,18 +45,18 @@ while capture.isOpened():
         color = (0, 0, 255)
         msg = "NIE MA RUCHU"
         if prev_moving:
-            prev_time = "- -"
-            elapsed = round(time.time() - time_start, 2)
-            elapsed_list.append(elapsed)
+            time_total = round(time.time() - time_start, 2)
+            stops_list.append(time_total)
             diff = 0
-            if len(elapsed_list) > 1:
-                diff = round(elapsed - elapsed_list[-2], 2)
+            if len(stops_list) > 1:
+                diff = round(time_total - stops_list[-2], 2)
 
-            time_labels.append(f"{elapsed}, diff: {diff}")
-        prev_moving = False
+                if diff >= 0.5:
+                    labels.append(f"{elapsed}, diff: {diff}")
+                    prev_moving = False
 
     label_y = 60
-    for label in time_labels:
+    for label in labels:
 
         label_y += 30
         cv2.putText(frame1, label, org=(10, label_y),
@@ -64,6 +64,10 @@ while capture.isOpened():
                     color=color, thickness=3)
 
     cv2.putText(frame1, msg, org=(10, 20),
+                fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
+                color=color, thickness=3)
+
+    cv2.putText(frame1, str(fps), org=(200, 20),
                 fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
                 color=color, thickness=3)
 
