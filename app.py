@@ -10,6 +10,7 @@ ret, frame2 = capture.read()
 time_start = time.time()
 prev_time = None
 time_labels = []
+elapsed_list = []
 
 prev_moving = False
 while capture.isOpened():
@@ -45,8 +46,13 @@ while capture.isOpened():
         msg = "NIE MA RUCHU"
         if prev_moving:
             prev_time = "- -"
-            time_labels.append(
-                f"{round(time.time() - time_start, 2)}, diff: {prev_time}")
+            elapsed = round(time.time() - time_start, 2)
+            elapsed_list.append(elapsed)
+            diff = 0
+            if len(elapsed_list) > 1:
+                diff = round(elapsed - elapsed_list[-2], 2)
+
+            time_labels.append(f"{elapsed}, diff: {diff}")
         prev_moving = False
 
     label_y = 60
