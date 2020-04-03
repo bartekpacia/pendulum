@@ -1,6 +1,7 @@
 from typing import Tuple
 import cv2
 import time
+import numpy
 print(f"using OpenCV v{cv2.__version__}")
 
 capture = cv2.VideoCapture("film3.mp4")
@@ -12,6 +13,7 @@ ret, frame2 = capture.read()
 time_start = time.time()
 labels = []
 stops_list = []
+T_list = []
 
 
 def drawText(text: str, color: Tuple[int, int, int], pos: Tuple[int, int]):
@@ -21,8 +23,8 @@ def drawText(text: str, color: Tuple[int, int, int], pos: Tuple[int, int]):
 
 prev_moving = False
 while capture.isOpened():
-    diff = cv2.absdiff(frame1, frame2)
-    gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+    T = cv2.absdiff(frame1, frame2)
+    gray = cv2.cvtColor(T, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
     _, threshold = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
     dilated = cv2.dilate(threshold, None, iterations=1)
@@ -52,12 +54,13 @@ while capture.isOpened():
         if prev_moving:
             time_total = round(time.time() - time_start, 2)
             stops_list.append(time_total)
-            diff = 0
+            T = 0
             if len(stops_list) > 1:
-                diff = round(time_total - stops_list[-2], 2)
+                T = round(time_total - stops_list[-2], 2)
 
-                if diff >= 0.5:
-                    labels.append(f"{time_total}, diff: {diff}")
+                if T >= 0.5:
+                    T_list.append(T)
+                    labels.append(f"T: {T}, od poczatku: {time_total}")
                     prev_moving = False
 
     label_y = 60
@@ -66,12 +69,16 @@ while capture.isOpened():
         label_y += 30
         drawText(label, color, (10, label_y))
 
-    drawText(msg, color, (10, 20))
-    drawText(str(fps), color, (300, 20))
+    drawText(msg, color, (10, 40))
+    drawText(fps, color, (300, 40))
+
+    T_average = round(numpy.mean(T_list), 2)
+    drawText(f"sredni okres: {T_average}", color, (500, 40))
 
     cv2.imshow("feed", frame1)
     frame1 = frame2
     ret, frame2 = capture.read()
+    print(f"frame2: {frame2}")
 
     if cv2.waitKey(40) == 27:
         break
