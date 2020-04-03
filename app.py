@@ -4,7 +4,7 @@ import time
 import numpy
 print(f"using OpenCV v{cv2.__version__}")
 
-capture = cv2.VideoCapture("film3.mp4")
+capture = cv2.VideoCapture("film3_sd.mp4")
 fps = round(capture.get(cv2.CAP_PROP_FPS), 2)
 
 ret, frame1 = capture.read()
@@ -16,13 +16,31 @@ stops_list = []
 T_list = []
 
 
-def drawText(text: str, color: Tuple[int, int, int], pos: Tuple[int, int]):
+def calc_avg_T() -> int:
+    return round(numpy.mean(T_list), 2)
+
+
+def drawText(text: str,
+             color: Tuple[int, int, int],
+             pos: Tuple[int, int],
+             big=False,
+             console=True):
+    if console:
+        print(text)
+
+    if big:
+        scale = 1
+        thickness = 4
+    else:
+        scale = 0.6
+        thickness = 2
+
     cv2.putText(frame1, str(text), org=pos, fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=1, color=color, thickness=3)
+                fontScale=scale, color=color, thickness=3)
 
 
 prev_moving = False
-while capture.isOpened():
+while capture.isOpened() and frame1 is not None and frame2 is not None:
     T = cv2.absdiff(frame1, frame2)
     gray = cv2.cvtColor(T, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -31,13 +49,11 @@ while capture.isOpened():
     contours, _ = cv2.findContours(
         dilated, cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE)
 
-    drawText("T", (255, 0, 0), (600, 400))
-
     big_moving_things = 0
     for contour in contours:
         (x, y, w, h) = cv2.boundingRect(contour)
 
-        if cv2.contourArea(contour) < 2000:
+        if cv2.contourArea(contour) < 1000:
             continue
         else:
             big_moving_things += 1
@@ -46,11 +62,11 @@ while capture.isOpened():
 
     if big_moving_things > 0:
         color = (0, 255, 0)
-        msg = "JEST RUCH"
+        msg = "MOVING"
         prev_moving = True
     else:
         color = (0, 0, 255)
-        msg = "NIE MA RUCHU"
+        msg = "NOT MOVING"
         if prev_moving:
             time_total = round(time.time() - time_start, 2)
             stops_list.append(time_total)
@@ -58,31 +74,32 @@ while capture.isOpened():
             if len(stops_list) > 1:
                 T = round(time_total - stops_list[-2], 2)
 
-                if T >= 0.5:
+                # because sometimes the end point is detected twice
+                if T >= 0.1:
                     T_list.append(T)
-                    labels.append(f"T: {T}, od poczatku: {time_total}")
+                    labels.append(f"T: {T}, total: {time_total}")
                     prev_moving = False
 
     label_y = 60
     for label in labels:
 
         label_y += 30
-        drawText(label, color, (10, label_y))
+        drawText(label, color, (10, label_y), console=False)
 
-    drawText(msg, color, (10, 40))
-    drawText(fps, color, (300, 40))
+    drawText(msg, color, (10, 40), console=False)
+    drawText(f"fps: {fps}", color, (300, 40), console=False)
 
-    T_average = round(numpy.mean(T_list), 2)
-    drawText(f"sredni okres: {T_average}", color, (500, 40))
+    T_average = calc_avg_T()
+    drawText(f"T avg: {T_average}", color, (500, 40))
 
     cv2.imshow("feed", frame1)
     frame1 = frame2
     ret, frame2 = capture.read()
-    print(f"frame2: {frame2}")
 
-    if cv2.waitKey(40) == 27:
+    if cv2.waitKey(1) == 27:
         break
 
 
+print(f"Measured {len(T_list)} periods, average: {calc_avg_T()}")
 cv2.destroyAllWindows()
 capture.release()
