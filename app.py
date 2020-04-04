@@ -21,14 +21,31 @@ T_half_list = []
 T_timestamps = []
 
 
-def calc_avg_T() -> float:
-    avg = numpy.mean(T_list)
-    return round(avg, 2)
+def calc_T() -> Tuple[float, float, float]:
+    """
+    Calculates T.
+
+    Returns a 3-element Tuple. First element is avg T, second is min T, third is max T.
+    """
+
+    avg = round(numpy.mean(T_list), 2)
+    low = round(numpy.min(T_list), 2)
+    high = round(numpy.max(T_list), 2)
+    return (avg, low, high)
 
 
-def calc_g() -> float:
-    g = (4 * 3.14 * 3.14 * length) / (calc_avg_T() * calc_avg_T())
-    return round(g, 2)
+def calc_g() -> Tuple[float, float, float]:
+    """
+    Calculates g.
+
+    Returns a 3-element Tuple. First element is avg g, second is min g, third is max g.
+    """
+    T_avg, T_min, T_max = calc_T()
+    g_avg = (4 * 3.14 * 3.14 * length) / (T_avg**2)
+    g_min = (4 * 3.14 * 3.14 * length) / (T_max**2)
+    g_max = (4 * 3.14 * 3.14 * length) / (T_min**2)
+
+    return (round(g_avg, 2), round(g_min, 2), round(g_max, 2))
 
 
 def drawText(text: str,
@@ -110,27 +127,34 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
         drawText(label, color, (10, label_y))
 
     drawText(msg, color, (10, 40))
-    drawText(f"total: {time_total}", color, (250, 40))
+    drawText(f"total: {time_total}", color, (120, 40))
 
-    T_avg = calc_avg_T()
-    drawText(f"T avg: {T_avg}", color, (400, 40))
+    if T_list:
+        g_avg, _, _ = calc_g()
+        drawText(f"g avg: {g_avg}", color, (250, 40))
+
+        T_avg, _, _ = calc_T()
+        drawText(f"T avg: {T_avg}", color, (390, 40))
+
+        print(f"g avg: {g_avg}, T avg: {T_avg}, stops count: {stops_count}")
+
+    t1 = cv2.getTickCount()
+    processing_time = round((t1-t0)/cv2.getTickFrequency(), 3)
+    print(f"processing took {processing_time} seconds.")
 
     cv2.imshow("feed", frame1)
     frame1 = frame2
     _, frame2 = capture.read()
-
     if cv2.waitKey(1) == 27:
         break
 
-    t1 = cv2.getTickCount()
-    print(f"g: {calc_g()}, T avg: {T_avg}, stops_count: {stops_count}")
-    print(
-        f"processing took {round((t1-t0)/cv2.getTickFrequency(), 3)} seconds.")
 
+T_avg, T_min, T_max = calc_T()
+print(
+    f"Measured {len(T_list)} full periods. T avg: {T_avg}, T min: {T_min}, T max: {T_max}")
 
-print(f"Measured {len(T_list)} full periods, average: {calc_avg_T()}")
-
-print(f"g: {calc_g()}")
+g_avg, g_min, g_max = calc_g()
+print(f"g avg: {g_avg}, g min: {g_min}, g max: {g_max}")
 
 cv2.destroyAllWindows()
 capture.release()
