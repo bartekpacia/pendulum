@@ -3,7 +3,7 @@ import cv2
 import time
 import numpy
 
-length = float(input("Enter length of the rope: "))
+length = float(input("Enter length of the rope (mine's 0.62): "))
 
 print(f"using OpenCV v{cv2.__version__}")
 
@@ -17,17 +17,25 @@ time_start = time.time()
 labels = []
 stops_list = []
 T_list = []
+T_half_list = []
+T_timestamps = []
 
 
-def calc_avg_T() -> int:
-    return round(numpy.mean(T_list), 2) * 2
+def calc_avg_T() -> float:
+    avg = numpy.mean(T_list)
+    return round(avg, 2)
+
+
+def calc_g() -> float:
+    g = (4 * 3.14 * 3.14 * length) / (calc_avg_T() * calc_avg_T())
+    return round(g, 2)
 
 
 def drawText(text: str,
              color: Tuple[int, int, int],
              pos: Tuple[int, int],
              big=False,
-             console=True):
+             console=False):
     if console:
         print(text)
 
@@ -43,6 +51,7 @@ def drawText(text: str,
 
 
 prev_moving = False
+stops_count = 0
 while capture.isOpened() and frame1 is not None and frame2 is not None:
     t0 = cv2.getTickCount()
     T = cv2.absdiff(frame1, frame2)
@@ -53,6 +62,7 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
     contours, _ = cv2.findContours(
         dilated, cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE)
 
+    time_total = round(time.time() - time_start, 2)
     big_moving_things = 0
     for contour in contours:
         (x, y, w, h) = cv2.boundingRect(contour)
@@ -65,36 +75,45 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
                           color=(0, 255, 0), thickness=2)
 
     if big_moving_things > 0:
-        color = (0, 255, 0)
         msg = "MOVING"
+        color = (0, 255, 0)
         prev_moving = True
     else:
-        color = (0, 0, 255)
         msg = "NOT MOVING"
+        color = (0, 0, 255)
         if prev_moving:
-            time_total = round(time.time() - time_start, 2)
             stops_list.append(time_total)
-            T = 0
-            if len(stops_list) > 1:
-                T = round(time_total - stops_list[-2], 2)
 
-                # because sometimes the end point is detected twice
-                # if T >= 0.1:
-                T_list.append(T)
-                labels.append(f"T: {T}, total: {time_total}")
+            if len(stops_list) > 1:
+                T_half = round(time_total - stops_list[-2], 2)
+            else:
+                T_half = 0
+
+            if T_half >= 0.3:
                 prev_moving = False
+                stops_count += 1
+                T_half_list.append(T)
+
+            if (stops_count % 2 == 0):
+                T_timestamp = time.time()
+                T_timestamps.append(T_timestamp)
+                if len(T_timestamps) > 1:
+                    T = round(T_timestamp - T_timestamps[-2], 2)
+                    T_list.append(T)
+                    labels.append(
+                        f"T: {T}")
 
     label_y = 60
     for label in labels:
 
         label_y += 30
-        drawText(label, color, (10, label_y), console=False)
+        drawText(label, color, (10, label_y))
 
-    drawText(msg, color, (10, 40), console=False)
-    drawText(f"fps: {fps}", color, (200, 40), console=False)
+    drawText(msg, color, (10, 40))
+    drawText(f"total: {time_total}", color, (250, 40))
 
-    T_average = calc_avg_T()
-    drawText(f"T avg: {T_average}", color, (400, 40))
+    T_avg = calc_avg_T()
+    drawText(f"T avg: {T_avg}", color, (400, 40))
 
     cv2.imshow("feed", frame1)
     frame1 = frame2
@@ -104,14 +123,14 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
         break
 
     t1 = cv2.getTickCount()
+    print(f"g: {calc_g()}, T avg: {T_avg}, stops_count: {stops_count}")
     print(
         f"processing took {round((t1-t0)/cv2.getTickFrequency(), 3)} seconds.")
 
 
-print(f"Measured {len(T_list)} periods, average: {calc_avg_T()}")
-g = (4 * 3.14 * 3.14 * length) / (calc_avg_T() * calc_avg_T())
+print(f"Measured {len(T_list)} full periods, average: {calc_avg_T()}")
 
-print(f"g: {g}")
+print(f"g: {calc_g()}")
 
 cv2.destroyAllWindows()
 capture.release()
