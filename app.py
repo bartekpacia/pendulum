@@ -7,7 +7,7 @@ length = float(input("Enter length of the rope: "))
 
 print(f"using OpenCV v{cv2.__version__}")
 
-capture = cv2.VideoCapture("film3_vga.mp4")
+capture = cv2.VideoCapture("film2_vga.mp4")
 fps = round(capture.get(cv2.CAP_PROP_FPS), 2)
 
 _, frame1 = capture.read()
@@ -20,7 +20,7 @@ T_list = []
 
 
 def calc_avg_T() -> int:
-    return round(numpy.mean(T_list), 2)
+    return round(numpy.mean(T_list), 2) * 2
 
 
 def drawText(text: str,
@@ -57,7 +57,7 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
     for contour in contours:
         (x, y, w, h) = cv2.boundingRect(contour)
 
-        if cv2.contourArea(contour) < 1000:
+        if cv2.contourArea(contour) < 300:
             continue
         else:
             big_moving_things += 1
@@ -79,10 +79,10 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
                 T = round(time_total - stops_list[-2], 2)
 
                 # because sometimes the end point is detected twice
-                if T >= 0.1:
-                    T_list.append(T)
-                    labels.append(f"T: {T}, total: {time_total}")
-                    prev_moving = False
+                # if T >= 0.1:
+                T_list.append(T)
+                labels.append(f"T: {T}, total: {time_total}")
+                prev_moving = False
 
     label_y = 60
     for label in labels:
@@ -109,7 +109,7 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
 
 
 print(f"Measured {len(T_list)} periods, average: {calc_avg_T()}")
-g = (4 * 3.14 * 3.14 * lenght) / (calc_avg_T() * calc_avg_T())
+g = (4 * 3.14 * 3.14 * length) / (calc_avg_T() * calc_avg_T())
 
 print(f"g: {g}")
 
