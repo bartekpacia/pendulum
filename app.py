@@ -7,8 +7,8 @@ print(f"using OpenCV v{cv2.__version__}")
 capture = cv2.VideoCapture("film3_vga.mp4")
 fps = round(capture.get(cv2.CAP_PROP_FPS), 2)
 
-ret, frame1 = capture.read()
-ret, frame2 = capture.read()
+_, frame1 = capture.read()
+_, frame2 = capture.read()
 
 time_start = time.time()
 labels = []
@@ -88,20 +88,21 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
         drawText(label, color, (10, label_y), console=False)
 
     drawText(msg, color, (10, 40), console=False)
-    drawText(f"fps: {fps}", color, (300, 40), console=False)
+    drawText(f"fps: {fps}", color, (200, 40), console=False)
 
     T_average = calc_avg_T()
-    drawText(f"T avg: {T_average}", color, (500, 40))
+    drawText(f"T avg: {T_average}", color, (400, 40))
 
     cv2.imshow("feed", frame1)
     frame1 = frame2
-    ret, frame2 = capture.read()
+    _, frame2 = capture.read()
 
     if cv2.waitKey(1) == 27:
         break
 
     t1 = cv2.getTickCount()
-    print(f"iteration took {(t1-t0)/cv2.getTickFrequency()} seconds.")
+    print(
+        f"processing took {round((t1-t0)/cv2.getTickFrequency(), 3)} seconds.")
 
 
 print(f"Measured {len(T_list)} periods, average: {calc_avg_T()}")
