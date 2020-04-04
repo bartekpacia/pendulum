@@ -2,6 +2,9 @@ from typing import Tuple
 import cv2
 import time
 import numpy
+
+length = float(input("Enter length of the rope: "))
+
 print(f"using OpenCV v{cv2.__version__}")
 
 capture = cv2.VideoCapture("film3_vga.mp4")
@@ -106,7 +109,6 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
 
 
 print(f"Measured {len(T_list)} periods, average: {calc_avg_T()}")
-lenght = 0.25  # 25 cm
 g = (4 * 3.14 * 3.14 * lenght) / (calc_avg_T() * calc_avg_T())
 
 print(f"g: {g}")
