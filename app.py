@@ -106,5 +106,10 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
 
 
 print(f"Measured {len(T_list)} periods, average: {calc_avg_T()}")
+lenght = 0.25  # 25 cm
+g = (4 * 3.14 * 3.14 * lenght) / (calc_avg_T() * calc_avg_T())
+
+print(f"g: {g}")
+
 cv2.destroyAllWindows()
 capture.release()
