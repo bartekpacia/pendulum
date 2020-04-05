@@ -114,7 +114,8 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
             if (stops_count % 2 == 0):
                 T_timestamp = time.time()
                 T_timestamps.append(T_timestamp)
-                if len(T_timestamps) > 1:
+                # ignore first period, it's way too short (video's fault)
+                if len(T_timestamps) > 3:
                     T = round(T_timestamp - T_timestamps[-2], 2)
                     T_list.append(T)
                     labels.append(
