@@ -1,4 +1,3 @@
-from typing import Tuple
 import cv2
 import time
 import numpy
@@ -21,7 +20,7 @@ T_half_list = []
 T_timestamps = []
 
 
-def calc_T() -> Tuple[float, float, float]:
+def calc_T() -> tuple[float, float, float]:
     """
     Calculates T.
 
@@ -34,11 +33,11 @@ def calc_T() -> Tuple[float, float, float]:
     return (avg, low, high)
 
 
-def calc_g() -> Tuple[float, float, float]:
+def calc_g() -> tuple[float, float, float]:
     """
     Calculates g.
 
-    Returns a 3-element Tuple. First element is avg g, second is min g, third is max g.
+    Returns a 3-element tuple. First element is avg g, second is min g, third is max g.
     """
     T_avg, T_min, T_max = calc_T()
     g_avg = (4 * 3.14 * 3.14 * length) / (T_avg**2)
@@ -48,23 +47,30 @@ def calc_g() -> Tuple[float, float, float]:
     return (round(g_avg, 2), round(g_min, 2), round(g_max, 2))
 
 
-def drawText(text: str,
-             color: Tuple[int, int, int],
-             pos: Tuple[int, int],
-             big=False,
-             console=False):
+def drawText(
+    text: str,
+    color: tuple[int, int, int],
+    pos: tuple[int, int],
+    big=False,
+    console=False,
+):
     if console:
         print(text)
 
     if big:
         scale = 1
-        thickness = 4
     else:
         scale = 0.6
-        thickness = 2
 
-    cv2.putText(frame1, str(text), org=pos, fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=scale, color=color, thickness=3)
+    cv2.putText(
+        frame1,
+        str(text),
+        org=pos,
+        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+        fontScale=scale,
+        color=color,
+        thickness=3,
+    )
 
 
 prev_moving = False
@@ -77,7 +83,8 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
     _, threshold = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
     dilated = cv2.dilate(threshold, None, iterations=1)
     contours, _ = cv2.findContours(
-        dilated, cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE)
+        dilated, cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE
+    )
 
     time_total = round(time.time() - time_start, 2)
     big_moving_things = 0
@@ -88,8 +95,9 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
             continue
         else:
             big_moving_things += 1
-            cv2.rectangle(frame1, pt1=(x, y), pt2=(x + w, y + h),
-                          color=(0, 255, 0), thickness=2)
+            cv2.rectangle(
+                frame1, pt1=(x, y), pt2=(x + w, y + h), color=(0, 255, 0), thickness=2
+            )
 
     if big_moving_things > 0:
         msg = "MOVING"
@@ -111,15 +119,14 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
                 stops_count += 1
                 T_half_list.append(T)
 
-            if (stops_count % 2 == 0):
+            if stops_count % 2 == 0:
                 T_timestamp = time.time()
                 T_timestamps.append(T_timestamp)
                 # ignore first period, it's way too short (video's fault)
                 if len(T_timestamps) > 3:
                     T = round(T_timestamp - T_timestamps[-2], 2)
                     T_list.append(T)
-                    labels.append(
-                        f"T: {T}")
+                    labels.append(f"T: {T}")
 
     label_y = 60
     for label in labels:
@@ -140,7 +147,7 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
         print(f"g avg: {g_avg}, T avg: {T_avg}, stops count: {stops_count}")
 
     t1 = cv2.getTickCount()
-    processing_time = round((t1-t0)/cv2.getTickFrequency(), 3)
+    processing_time = round((t1 - t0) / cv2.getTickFrequency(), 3)
     print(f"processing took {processing_time} seconds.")
 
     cv2.imshow("feed", frame1)
@@ -152,7 +159,8 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
 
 T_avg, T_min, T_max = calc_T()
 print(
-    f"Measured {len(T_list)} full periods. T avg: {T_avg}, T min: {T_min}, T max: {T_max}")
+    f"Measured {len(T_list)} full periods. T avg: {T_avg}, T min: {T_min}, T max: {T_max}"
+)
 
 g_avg, g_min, g_max = calc_g()
 print(f"g avg: {g_avg}, g min: {g_min}, g max: {g_max}")
