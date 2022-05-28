@@ -24,11 +24,14 @@ Never use it with amplitude > 10°. [Learn why][small-angle-approx].
 
 ### Usage
 
-Run `python app.py` in the project directory.
+First argument is the name of the video file in the current directory.
+
+Second argument is the length of the rope in meters.
+
+Example:
 
 ```
-$ python app.py
-`film2_vga.mp4` or `film2_fhd.mp4`
+$ python app.py film1_fhd.mp4 0.62
+```
 
 [small-angle-approx]: https://en.wikipedia.org/wiki/Pendulum_(mechanics)#Small-angle_approximation
-```

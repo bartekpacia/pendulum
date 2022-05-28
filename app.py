@@ -1,9 +1,25 @@
 import cv2
 import time
 import numpy
+import sys
 
-filename = input("Enter video file name: ")
-length = float(input("Enter length of the rope [m]: "))
+
+def usage():
+    print("Usage:")
+    print("python app.py [video_file] [rope length in m]")
+
+
+if len(sys.argv) < 3:
+    print("not enough arguments passed")
+    usage()
+
+if len(sys.argv) > 3:
+    print("too many arguments passed")
+    usage()
+
+
+filename = sys.argv[1]
+length = float(sys.argv[2])
 
 print(f"using OpenCV v{cv2.__version__}")
 
