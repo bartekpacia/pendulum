@@ -150,7 +150,7 @@ while capture.isOpened() and frame1 is not None and frame2 is not None:
 
     t1 = cv2.getTickCount()
     processing_time = round((t1 - t0) / cv2.getTickFrequency(), 3)
-    print(f"processing took {processing_time} seconds.")
+    print(f"processing took {processing_time} seconds")
 
     cv2.imshow("feed", frame1)
     frame1 = frame2
