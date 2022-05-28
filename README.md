@@ -1,16 +1,16 @@
-### The Pendolinum
+# pendulum
 
 Measuring gravitational acceleration using mathematical pendolinum.
 
 ![example](https://i.imgur.com/ppv2Lz2.png)
 
-> Never try to use it with amplitude > 10°. (Effect? screenshot, bottom-center)
+> Never try to use it with amplitude > 10°. (Effect? Screenshot, bottom-center.)
 
 ### Prerequisities
 
-- Python 3 installed
+- Python 3.10
 - `opencv-python` and `opencv-python-headless`
 
-### How to run
+### Usage
 
-Run `python3 app.py` in the project directory.
+Run `python app.py` in the project directory.

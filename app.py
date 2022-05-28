@@ -24,20 +24,22 @@ def calc_T() -> tuple[float, float, float]:
     """
     Calculates T.
 
-    Returns a 3-element Tuple. First element is avg T, second is min T, third is max T.
+    Returns a 3-element tuple. First element is average T, second is minimum T,
+    third is maximum T.
     """
 
-    avg = round(numpy.mean(T_list), 2)
-    low = round(numpy.min(T_list), 2)
-    high = round(numpy.max(T_list), 2)
-    return (avg, low, high)
+    T_avg = numpy.mean(T_list)
+    T_min = numpy.min(T_list)
+    T_max = numpy.max(T_list)
+    return (round(T_avg, 2), round(T_min, 2), round(T_max, 2))
 
 
 def calc_g() -> tuple[float, float, float]:
     """
     Calculates g.
 
-    Returns a 3-element tuple. First element is avg g, second is min g, third is max g.
+    Returns a 3-element tuple. First element is average g, second is minimum g,
+    third is maximum g.
     """
     T_avg, T_min, T_max = calc_T()
     g_avg = (4 * 3.14 * 3.14 * length) / (T_avg**2)
