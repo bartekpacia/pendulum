@@ -2,11 +2,12 @@ import cv2
 import time
 import numpy
 
-length = float(input("Enter length of the rope (mine's 0.62): "))
+filename = input("Enter video file name: ")
+length = float(input("Enter length of the rope [m]: "))
 
 print(f"using OpenCV v{cv2.__version__}")
 
-capture = cv2.VideoCapture("film2_vga.mp4")
+capture = cv2.VideoCapture(filename)
 fps = round(capture.get(cv2.CAP_PROP_FPS), 2)
 
 _, frame1 = capture.read()
